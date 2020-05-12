@@ -1,7 +1,10 @@
 #include "kalman_filter.h"
-
+#include <iostream>
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+
+using std::cout;
+using std::endl;
 
 /* 
  * Please note that the Eigen library does not initialize 
@@ -54,14 +57,20 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
    * TODO: update the state by using Extended Kalman Filter equations
    */
-  float x = z(0)*cos(z(1));
-  float y_dir =z(0)*sin(z(1)); 
-  float vx =z(2)*cos(z(1));
-  float vy =z(2)*sin(z(1)); 
+  float x = x_(0);
+  float y_dir = x_(1);
+  float vx = x_(2);
+  float vy = x_(3);
+  
+  //std::cout << "x " << x << std::endl;
+  //std::cout << "y " << y_dir << std::endl;
+  //std::cout << "vx " << vx << std::endl;
+  //std::cout << "vy " << vy << std::endl;
+  
 
   float rho = sqrt(x*x + y_dir*y_dir);
   float theta = atan2(y_dir,x);
-  float ro_dot = x*vx+y_dir*vy/rho;
+  float ro_dot = ((x*vx)+(y_dir*vy))/rho;
   
   VectorXd z_pred = VectorXd(3);
   z_pred << rho, theta, ro_dot;
@@ -71,14 +80,17 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   
   while (y(1) > M_PI)
   {
+    std::cout << "Above" << y(1) << std::endl;
     y(1) -= 2*M_PI;
   }
   
-    while (y(1) < -M_PI)
+  while (y(1) < -M_PI)
   {
+    std::cout << "below" << y(1) << std::endl;
     y(1) += 2*M_PI;
+
   }
-  
+  std::cout << "after " << y(1) << std::endl;
     
   MatrixXd Ht = H_.transpose();   
   MatrixXd S = H_ * P_ *Ht +R_ ;   
